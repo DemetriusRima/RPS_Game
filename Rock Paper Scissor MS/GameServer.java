@@ -70,7 +70,6 @@ class Room {
     }
 }
 
-/* ================= CLIENT HANDLER ================= */
 class ClientHandler extends Thread {
     private Socket socket;
     private Room room;
