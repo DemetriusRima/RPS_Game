@@ -9,7 +9,7 @@ public class ClientHandler extends Thread {
     private BufferedReader in;
     private PrintWriter out;
 
-    private String clientName = "Anonymous";
+    private String name = "Player";
 
     public ClientHandler(Socket socket, Room room) {
 
@@ -22,89 +22,49 @@ public class ClientHandler extends Thread {
 
         try {
 
-            // Input stream
             in = new BufferedReader(
-                    new InputStreamReader(
-                            socket.getInputStream()));
+                    new InputStreamReader(socket.getInputStream()));
 
-            // Output stream
             out = new PrintWriter(
                     socket.getOutputStream(),
                     true);
-            // Ask for player name
+
             out.println("Enter your name:");
 
-            String name = in.readLine();
+            String n = in.readLine();
 
-            if (name != null
-                    && !name.trim().isEmpty()) {
-
-                clientName = name.trim();
+            if (n != null && !n.trim().isEmpty()) {
+                name = n.trim();
             }
 
-            out.println("Welcome " + clientName);
-            out.println("Waiting for opponent...");
+            out.println("Welcome " + name);
 
-            // Add player to room
             room.addClient(this);
 
-        } catch (IOException e) {
-
-            System.out.println(
-                    "Connection error with "
-                            + clientName);
-
-        } finally {
-
-            closeConnection();
+        } catch (Exception e) {
+            System.out.println(name + " error");
         }
     }
 
-    // Send message to client
+    public String getClientName() {
+        return name;
+    }
+
     public void sendMessage(String msg) {
-
-        if (out != null) {
-            out.println(msg);
-        }
+        out.println(msg);
     }
 
-    // Read message safely
     public String readMessage() {
-
         try {
-
             return in.readLine();
-
-        } catch (IOException e) {
-
-            System.out.println(
-                    clientName
-                            + " disconnected.");
-
+        } catch (Exception e) {
             return null;
         }
     }
 
-    // Get player name
-    public String getClientName() {
-
-        return clientName;
-    }
-
-    // Close socket safely
-    public void closeConnection() {
-
+    public void close() {
         try {
-
-            if (socket != null
-                    && !socket.isClosed()) {
-
-                socket.close();
-            }
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
+            socket.close();
+        } catch (Exception ignored) {}
     }
 }

@@ -1,49 +1,32 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Room {
 
-    private List<ClientHandler> clients =
+    private final List<ClientHandler> waiting =
             new ArrayList<>();
 
     public synchronized void addClient(ClientHandler client) {
 
-        clients.add(client);
+        waiting.add(client);
 
-        broadcast(client.getClientName()
-                + " joined the room.");
+        broadcast(client.getName() + " joined.");
 
-        // Start game when 2 players join
-        if (clients.size() == 2) {
+        if (waiting.size() >= 2) {
 
-            ClientHandler p1 = clients.get(0);
-            ClientHandler p2 = clients.get(1);
+            ClientHandler p1 = waiting.remove(0);
+            ClientHandler p2 = waiting.remove(0);
 
-            broadcast("Starting match...");
-
-            GameSession game =
+            GameSession session =
                     new GameSession(p1, p2);
 
-            game.start();
-
-            // reset room for next players
-            clients.clear();
+            session.start();
         }
-    }
-
-    public synchronized void removeClient(
-            ClientHandler client) {
-
-        clients.remove(client);
-
-        broadcast(client.getClientName()
-                + " left the room.");
     }
 
     public synchronized void broadcast(String msg) {
 
-        for (ClientHandler client : clients) {
-            client.sendMessage(msg);
+        for (ClientHandler c : waiting) {
+            c.sendMessage(msg);
         }
     }
 }
