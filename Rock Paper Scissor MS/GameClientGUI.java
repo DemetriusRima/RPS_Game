@@ -94,10 +94,10 @@ public class GameClientGUI extends JFrame {
 
         add(top, BorderLayout.NORTH);
 
-        // Connect
+
         connectToServer();
 
-        // Listeners
+
         sendButton.addActionListener(
                 e -> sendChat());
 

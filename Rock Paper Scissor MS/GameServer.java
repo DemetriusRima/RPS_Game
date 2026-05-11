@@ -1,48 +1,36 @@
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 
 public class GameServer {
 
     private int port = 3000;
     private Room room = new Room();
 
-    private void start(int port) {
+    public void start() {
 
-        this.port = port;
+        System.out.println("Server running on port " + port);
 
-        System.out.println("Server started on port " + port);
-
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        try (ServerSocket serverSocket =
+                     new ServerSocket(port)) {
 
             while (true) {
 
-                Socket clientSocket = serverSocket.accept();
+                Socket socket = serverSocket.accept();
 
-                System.out.println("Client connected: "
-                        + clientSocket.getInetAddress());
+                System.out.println("Client connected");
 
-                ClientHandler client =
-                        new ClientHandler(clientSocket, room);
+                ClientHandler handler =
+                        new ClientHandler(socket, room);
 
-                client.start();
+                handler.start();
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static void main(String[] args) {
 
-        int port = 3000;
-
-        try {
-            port = Integer.parseInt(args[0]);
-        } catch (Exception e) {
-        }
-
-        GameServer server = new GameServer();
-        server.start(port);
+        new GameServer().start();
     }
 }

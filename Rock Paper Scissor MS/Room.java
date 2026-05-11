@@ -2,30 +2,59 @@ import java.util.*;
 
 public class Room {
 
-    private final List<ClientHandler> waiting =
-            new ArrayList<>();
+    private Queue<ClientHandler> queue =
+            new LinkedList<>();
 
-    public synchronized void addClient(ClientHandler client) {
+    public synchronized void addClient(ClientHandler c) {
 
-        waiting.add(client);
+        queue.add(c);
 
-        broadcast(client.getName() + " joined.");
+        broadcast(c.getName() + " joined queue");
 
-        if (waiting.size() >= 2) {
+        if (queue.size() >= 2) {
 
-            ClientHandler p1 = waiting.remove(0);
-            ClientHandler p2 = waiting.remove(0);
+            ClientHandler p1 = queue.poll();
+            ClientHandler p2 = queue.poll();
 
             GameSession session =
-                    new GameSession(p1, p2);
+                    new GameSession(p1, p2, this);
 
             session.start();
         }
     }
 
+    public synchronized void returnWinner(
+            ClientHandler winner) {
+
+        queue.add(winner);
+
+        broadcast(winner.getName()
+                + " stays in queue");
+        tryMatch();
+    
+    }
+    
+    private void tryMatch() {
+
+        if (queue.size() < 2) return;
+
+        ClientHandler p1 = queue.poll();
+        ClientHandler p2 = queue.poll();
+
+        broadcast("Match starting: "
+                + p1.getName()
+                + " vs "
+                + p2.getName());
+
+        GameSession session =
+                new GameSession(p1, p2, this);
+
+        session.start();
+    }
+    
     public synchronized void broadcast(String msg) {
 
-        for (ClientHandler c : waiting) {
+        for (ClientHandler c : queue) {
             c.sendMessage(msg);
         }
     }
